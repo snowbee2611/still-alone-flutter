@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "still_alone_flutter" "\0"
+            VALUE "CompanyName", "com.snowbee" "\0"
+            VALUE "FileDescription", "stillalone" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "still_alone_flutter" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "still_alone_flutter.exe" "\0"
-            VALUE "ProductName", "still_alone_flutter" "\0"
+            VALUE "InternalName", "stillalone" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.snowbee. All rights reserved." "\0"
+            VALUE "OriginalFilename", "stillalone.exe" "\0"
+            VALUE "ProductName", "stillalone" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

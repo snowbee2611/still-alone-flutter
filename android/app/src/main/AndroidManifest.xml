@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.still_alone_flutter">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Internet (optional but safe to keep) -->
     <uses-permission android:name="android.permission.INTERNET"/>
