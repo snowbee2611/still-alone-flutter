@@ -4,7 +4,8 @@ import 'services/notification_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:ui';
 
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> navigatorKey =
+GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,23 +41,41 @@ class HomeGate extends StatefulWidget {
 }
 
 class _HomeGateState extends State<HomeGate> {
+
   @override
   void initState() {
     super.initState();
-    _checkAndShowPermission();
+    _initializeNotifications();
   }
 
-  Future<void> _checkAndShowPermission() async {
+  Future<void> _initializeNotifications() async {
     final prefs = await SharedPreferences.getInstance();
-    final hasSeen = prefs.getBool('permission_prompt_shown') ?? false;
 
-    // Check actual notification permission status
-    final isGranted = await NotificationService.isPermissionGranted();
+    // 🔥 Track last open time (for inactivity logic)
+    await prefs.setInt(
+      'last_open_time',
+      DateTime.now().millisecondsSinceEpoch,
+    );
 
-    // Show dialog again ONLY if permission is still denied
+    final hasScheduled =
+        prefs.getBool('notifications_initialized') ?? false;
+
+    // 🚫 DO NOT request permission automatically
+
+    final isGranted =
+    await NotificationService.isPermissionGranted();
+
+    if (isGranted && !hasScheduled) {
+      await NotificationService.showWelcomeNotification();
+      await NotificationService.scheduleWeeklyNotifications();
+
+      await prefs.setBool(
+          'notifications_initialized', true);
+    }
+
     if (!isGranted) {
-      // If user has never seen it OR permission is still denied
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(
+          const Duration(milliseconds: 600));
       _showFloatingReminder();
     }
   }
@@ -67,21 +86,29 @@ class _HomeGateState extends State<HomeGate> {
       barrierDismissible: true,
       barrierLabel: "",
       barrierColor: Colors.black.withOpacity(0.3),
-      transitionDuration: const Duration(milliseconds: 400),
+      transitionDuration:
+      const Duration(milliseconds: 400),
       pageBuilder: (_, __, ___) {
         return Stack(
           children: [
             BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-              child: Container(color: Colors.black.withOpacity(0.2)),
+              filter: ImageFilter.blur(
+                  sigmaX: 8, sigmaY: 8),
+              child: Container(
+                  color:
+                  Colors.black.withOpacity(0.2)),
             ),
             Center(
               child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 30),
-                padding: const EdgeInsets.all(28),
+                margin: const EdgeInsets.symmetric(
+                    horizontal: 30),
+                padding:
+                const EdgeInsets.all(28),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3E8FF),
-                  borderRadius: BorderRadius.circular(28),
+                  color:
+                  const Color(0xFFF3E8FF),
+                  borderRadius:
+                  BorderRadius.circular(28),
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black26,
@@ -91,65 +118,122 @@ class _HomeGateState extends State<HomeGate> {
                   ],
                 ),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize:
+                  MainAxisSize.min,
                   children: [
-                    const Icon(Icons.notifications_active,
-                        color: Color(0xFFD1C4E9), size: 55),
-                    const SizedBox(height: 20),
+                    const Icon(
+                      Icons
+                          .notifications_active,
+                      color:
+                      Color(0xFFD1C4E9),
+                      size: 55,
+                    ),
+                    const SizedBox(
+                        height: 20),
                     const Text(
                       "Enable gentle reminders?",
-                      textAlign: TextAlign.center,
+                      textAlign:
+                      TextAlign.center,
                       style: TextStyle(
                         fontSize: 21,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        fontWeight:
+                        FontWeight.w600,
+                        color:
+                        Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(
+                        height: 12),
                     const Text(
                       "We send soft check-ins sometimes 💜",
-                      textAlign: TextAlign.center,
+                      textAlign:
+                      TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.black54,
+                        color:
+                        Colors.black54,
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(
+                        height: 28),
                     Row(
                       children: [
                         Expanded(
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                          child:
+                          OutlinedButton(
+                            style:
+                            OutlinedButton
+                                .styleFrom(
+                              shape:
+                              RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius
+                                    .circular(
+                                    20),
                               ),
                             ),
-                            onPressed: () async {
-                              final prefs = await SharedPreferences.getInstance();
-                              await prefs.setBool('permission_prompt_shown', true);
-                              Navigator.pop(navigatorKey.currentContext!);
+                            onPressed: () {
+                              Navigator.pop(
+                                  navigatorKey
+                                      .currentContext!);
                             },
-                            child: const Text("Not now"),
+                            child:
+                            const Text(
+                                "Not now"),
                           ),
                         ),
-                        const SizedBox(width: 14),
+                        const SizedBox(
+                            width: 14),
                         Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFD1C4E9),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
+                          child:
+                          ElevatedButton(
+                            style:
+                            ElevatedButton
+                                .styleFrom(
+                              backgroundColor:
+                              const Color(
+                                  0xFFD1C4E9),
+                              shape:
+                              RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius
+                                    .circular(
+                                    20),
                               ),
                             ),
-                            onPressed: () async {
-                              final prefs = await SharedPreferences.getInstance();
-                              await prefs.setBool('permission_prompt_shown', true);
-                              Navigator.pop(navigatorKey.currentContext!);
-                              await NotificationService.requestPermission();
+                            onPressed:
+                                () async {
+                              Navigator.pop(
+                                  navigatorKey
+                                      .currentContext!);
+
+                              await NotificationService
+                                  .requestPermission();
+
+                              final granted =
+                              await NotificationService
+                                  .isPermissionGranted();
+
+                              if (granted) {
+                                await NotificationService
+                                    .showWelcomeNotification();
+                                await NotificationService
+                                    .scheduleWeeklyNotifications();
+
+                                final prefs =
+                                await SharedPreferences
+                                    .getInstance();
+                                await prefs.setBool(
+                                    'notifications_initialized',
+                                    true);
+                              }
                             },
-                            child: const Text(
+                            child:
+                            const Text(
                               "Enable 💜",
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(
+                                  color: Colors
+                                      .white),
                             ),
                           ),
                         ),
@@ -162,20 +246,27 @@ class _HomeGateState extends State<HomeGate> {
           ],
         );
       },
-      transitionBuilder: (_, animation, __, child) {
+      transitionBuilder:
+          (_, animation, __, child) {
         return FadeTransition(
           opacity: CurvedAnimation(
             parent: animation,
             curve: Curves.easeOut,
           ),
           child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.1),
+            position:
+            Tween<Offset>(
+              begin:
+              const Offset(0, 0.1),
               end: Offset.zero,
-            ).animate(CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutBack,
-            )),
+            ).animate(
+              CurvedAnimation(
+                parent:
+                animation,
+                curve:
+                Curves.easeOutBack,
+              ),
+            ),
             child: child,
           ),
         );
